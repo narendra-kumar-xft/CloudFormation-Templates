@@ -1,0 +1,80 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Template to create test S3 bucket",
+  "Metadata": {},
+  "Parameters": {
+	"MyS3BucketName": {
+		"Description": "My S3 Bucket",
+		"Type": "String",
+		"Default": "xxxx"
+	}
+  },
+  "Mappings": {},
+  "Conditions": {},
+  "Resources": {
+	"MyS3Bucket": {
+		"Type": "AWS::S3::Bucket",
+		"Properties": {
+			"BucketName": {
+				"Ref": "MyS3BucketName"
+			},
+			"BucketEncryption": {
+				"ServerSideEncryptionConfiguration": [
+					{
+						"ServerSideEncryptionByDefault": {
+							"KMSMasterKeyID": "2bd61a97-d404-4c50-bb45-e22e68fe0db0",
+							"SSEAlgorithm": "aws:kms"
+						}
+					}
+				]
+			},
+			"AccessControl": "PublicRead",
+			"VersioningConfiguration": {
+				"Status": "Enabled"
+			},
+			"LoggingConfiguration": {
+				"DestinationBucketName": "s3-logging-all",
+				"LogFilePrefix": "nktest-logs"
+			},
+			"LifecycleConfiguration": {
+				"Rules": [
+					{
+						"ExpirationInDays": "7",
+						"Status": "Enabled",
+						"AbortIncompleteMultipartUpload": {
+							"DaysAfterInitiation": "1"
+						}
+					}
+				]
+			},
+			"Tags": [
+				{
+				"Key": "Name",
+				"Value": "nk-test-bucket"
+				},
+				{
+				"Key": "Environment",
+				"Value": "Dev"
+				}
+			]
+		}
+      }
+    },
+  "Outputs": {
+	"BucketName": {
+		"Description": "Bucket created for testing by NK",
+		"Value" : { "Ref" : "MyS3Bucket" },
+		"Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TestBucketNK" }}
+	},
+	"BucketWebURL": {
+		"Description": "Bucket created for testing by NK",
+		"Value" : { "Fn::GetAtt": [ "MyS3Bucket", "WebsiteURL" ] },
+		"Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TestBucketNKWebURL" }}
+	},
+	"BucketDNS": {
+		"Description": "Bucket created for testing by NK",
+		"Value" : { "Fn::Join": [ "", [ "https://", { "Fn::GetAtt": [ "MyS3Bucket", "DomainName" ] } ] ] },
+		"Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TestBucketNKDomainName" }}
+	}
+  }
+}
